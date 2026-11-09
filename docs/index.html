@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오키나와 스테디 명소</title>
+<meta name="description" content="네이버 검색 3년 추세와 블로그·카페 글로 본 오키나와의 꾸준한 명소 순위">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@400&display=swap">
+<style>
+/* 대시보드 환경이 주던 디자인 토큰을 이 페이지에서 직접 정의 */
+:root {
+  --color-fg: #1d2326; --color-fg-muted: #5f6b70; --color-bg: #fbfcfc; --color-panel: #f1f4f4; --color-border-line: #dfe5e6;
+  --color-ok: #1f7a4d; --color-warn: #a35f00; --color-bad: #b4372d;
+  --font-anthropic-sans: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  --font-anthropic-serif: "Noto Serif KR", "Apple SD Gothic Neo", Georgia, serif;
+  --cds-font-size-caption: 12px; --cds-font-size-body: 14px; --cds-font-size-heading: 18px; --cds-font-size-title: 28px; --cds-font-weight-medium: 500;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 12px; --cds-gap-lg: 20px; --cds-gap-xl: 36px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-radius: 8px;
+  --cds-chart-grid: #e6ebec; --cds-chart-axis: #c9d1d3; --cds-chart-reference: #7f8b90; --cds-chart-muted: #b9c3c6; --cds-text-secondary: #5f6b70;
+  --cds-surface-popover: #ffffff; --cds-border: #dfe5e6; --cds-shadow-popover: 0 6px 20px rgba(20, 30, 35, .12);
+  --c1: #1d7f8c; --c2: #e0784c; --c3: #6a5acd; --c4: #c2185b; --c5: #8a9a2b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-fg: #e8eced; --color-fg-muted: #9aa6aa; --color-bg: #14181a; --color-panel: #1c2224; --color-border-line: #2e3639;
+    --color-ok: #5cc690; --color-warn: #e6a54a; --color-bad: #f07a6e;
+    --cds-chart-grid: #262d30; --cds-chart-axis: #3a4346; --cds-chart-reference: #8a969a; --cds-chart-muted: #4a5558; --cds-text-secondary: #9aa6aa;
+    --cds-surface-popover: #222a2c; --cds-border: #333c3f; --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, .45);
+    --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --color-fg: #e8eced; --color-fg-muted: #9aa6aa; --color-bg: #14181a; --color-panel: #1c2224; --color-border-line: #2e3639;
+  --color-ok: #5cc690; --color-warn: #e6a54a; --color-bad: #f07a6e;
+  --cds-chart-grid: #262d30; --cds-chart-axis: #3a4346; --cds-chart-reference: #8a969a; --cds-chart-muted: #4a5558; --cds-text-secondary: #9aa6aa;
+  --cds-surface-popover: #222a2c; --cds-border: #333c3f; --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, .45);
+  --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454;
+  color-scheme: dark;
+}
+html, body { margin: 0; }
+body { background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); line-height: 1.45; }
+#dash-root { max-width: 1080px; margin: 0 auto; padding-block: 32px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.dash-select { font: inherit; color: var(--color-fg); background-color: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 6px; padding: 4px 8px; }
+.okr-foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: var(--cds-gap-xl); }
+@media (max-width: 560px) { :root { --cds-font-size-title: 23px; --cds-font-size-heading: 16px; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+/* 대시보드의 dash.* 기능 중 이 페이지가 쓰는 것만 흉내 내는 작은 연결 코드.
+   data/*.json 을 불러와 dash.data / dash.calc / dash.draw 로 넘겨준다. */
+window.dash = (() => {
+  const FILES = { places: 'data/places.json', trend: 'data/trend.json', posts: 'data/posts.json', stats: 'data/stats.json', picks: 'data/picks.json' };
+  const store = {}, calcs = {}, draws = {};
+  let ready = false;
+  for (const k in FILES) store[k] = { status: 'loading', data: [] };
+  const data = (id) => {
+    const c = calcs[id];
+    if (c) {
+      const ins = c.inputs.map(data);
+      if (ins.some((x) => x.status !== 'ok')) return { status: ins.some((x) => x.status === 'error') ? 'error' : 'loading', data: null };
+      if (!c.key || c.key.some((v, i) => v !== ins[i].data)) { c.key = ins.map((x) => x.data); c.val = c.fn(...ins.map((x) => x.data)); }
+      return { status: 'ok', data: c.val };
+    }
+    return store[id] || { status: 'missing', data: [] };
+  };
+  const run = (name) => {
+    document.querySelectorAll(`[data-draw="${name}"]`).forEach((el) => {
+      try { draws[name](el); } catch (e) { console.error('draw ' + name, e); }
+    });
+  };
+  const runAll = () => Object.keys(draws).forEach(run);
+  const api = {
+    colors: ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'],
+    data,
+    calc: (id, def) => { calcs[id] = { inputs: def.inputs, fn: def.fn }; },
+    draw: (name, fn) => { if (fn) { draws[name] = fn; if (ready) run(name); } else if (draws[name]) run(name); },
+    onData: () => {},
+    refresh: () => {},
+  };
+  const load = () => Promise.all(Object.entries(FILES).map(([k, url]) =>
+    fetch(url, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then((d) => { store[k] = { status: 'ok', data: d }; })
+      .catch(() => { store[k] = { status: 'error', data: [] }; })
+  )).then(() => { ready = true; runAll(); });
+  document.addEventListener('DOMContentLoaded', () => { runAll(); load(); });
+  let t = null, lastW = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; if (ready) runAll(); } }, 150);
+  });
+  return api;
+})();
+</script>
+</head>
+<body>
+<div id="dash-root">
+<style>
+.okr { display: flex; flex-direction: column; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.okr-head { display: flex; flex-direction: column; gap: var(--cds-gap-sm); }
+.okr-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+.okr-lede { font-size: var(--cds-font-size-heading); line-height: 1.5; margin: 0; max-width: 62ch; }
+.okr-lede b { font-weight: var(--cds-font-weight-medium); }
+.okr-meta { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 0; font-variant-numeric: tabular-nums; }
+.okr-sec { display: flex; flex-direction: column; gap: var(--cds-gap-md); min-width: 0; }
+.okr-sec h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.okr-sub { color: var(--color-fg-muted); margin: 0; font-size: var(--cds-font-size-body); max-width: 72ch; }
+.okr-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--cds-gap-md); }
+.okr-tier { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: flex; flex-direction: column; gap: 2px; }
+.okr-tier .k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.okr-tier .v { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; line-height: 1.15; min-height: 1.15em; }
+.okr-tier .d { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.okr-rank { display: flex; flex-direction: column; min-height: 200px; }
+.okr-rank .row { display: grid; grid-template-columns: 1.8em minmax(0, 11em) minmax(0, 1fr) 3.6em 4.6em 3.4em; gap: var(--cds-gap-sm); align-items: center; padding: 6px 0; border-bottom: 1px solid var(--color-border-line); cursor: pointer; background: none; border-left: 0; border-right: 0; border-top: 0; font: inherit; color: inherit; text-align: left; width: 100%; }
+.okr-rank .row:hover, .okr-rank .row:focus-visible { background: var(--color-panel); outline: none; }
+.okr-rank .row.on { background: var(--color-panel); }
+.okr-rank .hdr { cursor: default; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.okr-rank .hdr:hover { background: none; }
+.okr-rank .no { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-caption); text-align: right; }
+.okr-rank .nm { font-weight: var(--cds-font-weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.okr-rank .nm small { display: block; font-weight: 400; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.okr-rank .bar { height: 10px; border-radius: 2px; min-width: 2px; }
+.okr-rank .num { text-align: right; font-variant-numeric: tabular-nums; }
+.okr-rank .yrs { display: flex; align-items: flex-end; gap: 2px; height: 22px; }
+.okr-rank .yrs i { display: block; width: 10px; border-radius: 1px 1px 0 0; }
+@media (max-width: 560px) {
+  .okr-rank .row { grid-template-columns: 1.6em minmax(0, 1fr) 3.4em 4.4em; }
+  .okr-rank .barc, .okr-rank .yrsc { display: none; }
+}
+.okr-chart { position: relative; min-height: 380px; }
+.okr-chart svg text, .okr-dtrend svg text { fill: var(--cds-text-secondary); font-size: var(--cds-font-size-caption); }
+.okr-chart .lbl { fill: var(--color-fg); }
+.okr-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); min-height: 1.2em; }
+.okr-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.okr-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: var(--cds-pad-sm); font-size: var(--cds-font-size-caption); line-height: 1.5; max-width: 230px; z-index: 2; }
+.okr-tip b { display: block; font-size: var(--cds-font-size-body); }
+.okr-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+.okr-controls label { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.okr-tablewrap { overflow-x: auto; }
+.okr-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-body); }
+.okr-table th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.okr-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.okr-table th.n, .okr-table td.n { text-align: right; }
+.okr-table th.ref, .okr-table td.ref { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.okr-table tbody tr { cursor: pointer; }
+.okr-table tbody tr:hover, .okr-table tbody tr.on { background: var(--color-panel); }
+.okr-table td.nm { font-weight: var(--cds-font-weight-medium); }
+.okr-badge { display: inline-block; font-size: var(--cds-font-size-caption); border-radius: 999px; padding: 0 8px; border: 1px solid var(--color-border-line); white-space: nowrap; }
+.okr-badge.t1 { border-color: var(--color-ok); color: var(--color-ok); }
+.okr-badge.t2 { color: var(--color-fg); }
+.okr-badge.t3 { border-color: var(--color-warn); color: var(--color-warn); }
+.okr-badge.t4 { color: var(--color-fg-muted); }
+.okr-detail { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: flex; flex-direction: column; gap: var(--cds-gap-md); }
+.okr-detail h3 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.okr-facts { display: flex; flex-wrap: wrap; gap: var(--cds-gap-lg); font-variant-numeric: tabular-nums; min-height: 2.5em; }
+.okr-facts div { display: flex; flex-direction: column; }
+.okr-facts span { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.okr-facts strong { font-weight: var(--cds-font-weight-medium); font-size: var(--cds-font-size-heading); }
+.okr-facts .ref strong { font-size: var(--cds-font-size-body); color: var(--color-fg-muted); font-weight: 400; }
+.okr-dtrend { position: relative; min-height: 210px; }
+.okr-posts { display: flex; flex-direction: column; gap: var(--cds-gap-md); list-style: none; margin: 0; padding: 0; min-height: 80px; }
+.okr-posts li { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.okr-posts a { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); text-decoration: underline; text-decoration-color: var(--color-border-line); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.okr-posts a:hover { text-decoration-color: var(--color-fg); }
+.okr-posts p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); overflow-wrap: anywhere; }
+.okr-pill { display: inline-block; font-size: var(--cds-font-size-caption); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 0 8px; margin-right: 6px; color: var(--color-fg-muted); font-weight: 400; }
+.okr-note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 0; }
+.okr-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--cds-gap-lg); }
+@media (max-width: 720px) { .okr-cols { grid-template-columns: minmax(0, 1fr); } }
+.okr-ref { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-pad-md); }
+.okr-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); min-height: 1.6em; }
+.okr-chip { font: inherit; font-size: var(--cds-font-size-caption); background: none; border: 1px solid var(--color-border-line); border-radius: 999px; padding: 2px 10px; color: var(--color-fg-muted); cursor: pointer; font-variant-numeric: tabular-nums; }
+.okr-chip:hover, .okr-chip:focus-visible { color: var(--color-fg); border-color: var(--color-fg-muted); outline: none; }
+.okr-notes { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.6; }
+.okr-notes summary { cursor: pointer; color: var(--color-fg); font-size: var(--cds-font-size-body); }
+.okr-notes ul { padding-left: 1.2em; max-width: 78ch; }
+.okr-up { color: var(--color-ok); }
+.okr-down { color: var(--color-bad); }
+.okr-silk { display: inline-block; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); letter-spacing: .02em; padding: 1px 8px; border-radius: 999px; background: var(--color-fg); color: var(--color-bg); white-space: nowrap; vertical-align: 2px; }
+.okr-sec h2 .okr-silk { font-size: var(--cds-font-size-body); margin-right: 6px; }
+.okr-table .okr-silk, .okr-detail h3 .okr-silk { margin-left: 6px; }
+.okr-rank .nm small .okr-silk { font-size: 11px; padding: 0 6px; vertical-align: 0; }
+.okr-pickgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--cds-gap-md); min-height: 120px; }
+.okr-pick { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: flex; flex-direction: column; gap: var(--cds-gap-xs); min-width: 0; }
+.okr-pick .nm { font: inherit; font-weight: var(--cds-font-weight-medium); background: none; border: 0; padding: 0; color: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--color-border-line); text-underline-offset: 3px; }
+.okr-pick .nm:hover, .okr-pick .nm:focus-visible { text-decoration-color: var(--color-fg); outline: none; }
+.okr-pick .note { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.okr-pick .meta { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: auto; }
+.okr-map { font-size: var(--cds-font-size-caption); color: var(--color-fg); white-space: nowrap; text-decoration: underline; text-decoration-color: var(--color-border-line); text-underline-offset: 3px; }
+.okr-map:hover { text-decoration-color: var(--color-fg); }
+.okr-picknote { margin: 0; padding: var(--cds-pad-sm) var(--cds-pad-md); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); line-height: 1.5; }
+.okr-picknote:empty { display: none; }
+.okr-dlinks { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; min-height: 1.2em; }
+[data-dash-source-state=refreshing] { opacity: .5; }
+</style>
+
+<div class="okr" lang="ko">
+  <header class="okr-head" id="top">
+    <h1 class="okr-title">오키나와 스테디 명소</h1>
+    <p class="okr-lede">3년 동안 꾸준히 가장 많이 찾은 곳은 <b data-draw="topName">—</b>예요. 필수 스테디 <b data-draw="cntT1">—</b>곳, 꾸준한 곳 <b data-draw="cntT2">—</b>곳을 찾았어요.</p>
+    <p class="okr-meta">블로그·카페 글 <span data-draw="nPosts" data-source="stats" data-field="collected" data-row="0">—</span>건에서 장소 <span data-draw="nPlaces" data-source="stats" data-field="places" data-row="0">—</span>곳을 뽑았어요 · 2026년 11월 9일 수집 · 네이버 검색 추세 2023년 11월 ~ 2026년 10월(36개월)</p>
+  </header>
+
+  <section class="okr-sec" id="picks">
+    <h2><span class="okr-silk">silk pick!</span> 내가 다녀와서 고른 곳</h2>
+    <div class="okr-pickgrid" data-draw="pickCards" data-source="picks places tiers"></div>
+  </section>
+
+  <section class="okr-sec" id="must">
+    <h2>필수 스테디</h2>
+    <p class="okr-sub">스테디 점수는 3년 평균 검색지수에 꾸준함을 곱한 값이에요. 막대 옆 작은 기둥 3개는 연도별 검색지수(23.11~24.10, 24.11~25.10, 25.11~26.10)예요. 이름을 누르면 아래에 자세히 나와요.</p>
+    <div class="okr-rank" data-draw="rank1" data-source="places tiers"></div>
+  </section>
+
+  <section class="okr-sec" id="steady">
+    <h2>꾸준한 곳</h2>
+    <p class="okr-sub">검색량은 중간이지만 3년 내내 비슷하게 찾는 곳이에요. 일정에 여유가 있을 때 넣기 좋은 후보예요.</p>
+    <div class="okr-rank" data-draw="rank2" data-source="places tiers"></div>
+  </section>
+
+  <section class="okr-sec" id="map">
+    <h2>얼마나 찾고, 얼마나 꾸준한가</h2>
+    <p class="okr-sub">오른쪽일수록 3년 평균 검색량이 많고, 위쪽일수록 해마다 고르게 찾은 곳이에요. 점선 오른쪽 위가 필수 스테디예요. 점 크기는 최근 30일 블로그 글 수예요.</p>
+    <div class="okr-legend" data-draw="legend"></div>
+    <div class="okr-chart" data-draw="scatter" data-source="places tiers"></div>
+  </section>
+
+  <section class="okr-sec" id="detail">
+    <h2>장소 자세히 보기</h2>
+    <div class="okr-detail">
+      <h3 data-draw="dName">—</h3>
+      <p class="okr-picknote" data-draw="dPick" data-source="picks"></p>
+      <div class="okr-dlinks" data-draw="dLinks" data-source="places picks"></div>
+      <div class="okr-facts" data-draw="dFacts" data-source="places tiers"></div>
+      <div class="okr-cols">
+        <div class="okr-sec">
+          <p class="okr-note">월별 검색지수 36개월 · 배경은 연도 구분</p>
+          <div class="okr-dtrend" data-draw="dTrend" data-source="trend"></div>
+        </div>
+        <div class="okr-sec">
+          <p class="okr-note">블로그·카페 대표 글</p>
+          <ul class="okr-posts" data-draw="dPosts" data-source="posts"></ul>
+        </div>
+      </div>
+      <p class="okr-note">구글맵 평점: 아직 연결하지 않았어요. Google Places API 키를 연결하면 여기에 평점과 리뷰 수가 나와요.</p>
+    </div>
+  </section>
+
+  <section class="okr-sec" id="all">
+    <h2>전체 장소</h2>
+    <div class="okr-controls">
+      <label for="okr-tier">등급</label>
+      <select class="dash-select" id="okr-tier" aria-label="등급">
+        <option value="">전체</option>
+        <option value="필수 스테디">필수 스테디</option>
+        <option value="꾸준한 곳">꾸준한 곳</option>
+        <option value="변동 큼">변동 큼</option>
+        <option value="검색 적음">검색 적음</option>
+      </select>
+      <label for="okr-cat">분류</label>
+      <select class="dash-select" id="okr-cat" data-draw="catSel" aria-label="분류" data-source="places"></select>
+      <label for="okr-sort">정렬</label>
+      <select class="dash-select" id="okr-sort" aria-label="정렬">
+        <option value="steady">스테디 점수 높은 순</option>
+        <option value="vol36">3년 평균 검색지수 높은 순</option>
+        <option value="consistency">꾸준함 높은 순</option>
+        <option value="blog30">최근 30일 블로그 글 많은 순</option>
+        <option value="mentions">수집 글 언급 많은 순</option>
+        <option value="relYoy">참고: 작년 대비 높은 순</option>
+      </select>
+    </div>
+    <div class="okr-tablewrap">
+      <table class="okr-table" data-source="places" data-row-key="name">
+        <thead>
+          <tr>
+            <th data-field="name">장소</th>
+            <th data-source="tiers" data-field="tier">등급</th>
+            <th data-field="cat">분류</th>
+            <th data-field="region">지역</th>
+            <th class="n" data-field="steady">스테디 점수</th>
+            <th class="n" data-field="vol36">3년 평균 검색지수</th>
+            <th class="n" data-field="consistency">꾸준함</th>
+            <th>36개월 추세</th>
+            <th class="n" data-field="blog30">최근 30일 블로그</th>
+            <th class="n" data-field="mentions">수집 글 언급</th>
+            <th class="n ref" data-field="relYoy">참고: 작년 대비</th>
+            <th>구글맵</th>
+          </tr>
+        </thead>
+        <tbody data-draw="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="okr-sec okr-ref" id="recent">
+    <h2>참고: 최근 변화</h2>
+    <p class="okr-sub">2026년 8~10월 검색량을 작년 같은 달과 비교하고 오키나와 전체 증감만큼 보정한 값이에요. 한두 시즌의 변화라서 참고만 하세요.</p>
+    <p class="okr-note">작년보다 많이 찾는 곳</p>
+    <div class="okr-chips" data-draw="chipsUp" data-source="rising"></div>
+    <p class="okr-note">작년보다 덜 찾는 곳</p>
+    <div class="okr-chips" data-draw="chipsDown" data-source="cooling"></div>
+  </section>
+
+  <details class="okr-notes" id="notes">
+    <summary>지표 설명과 한계</summary>
+    <ul>
+      <li><b>검색지수</b>: 네이버 검색어 트렌드의 월별 검색량을, 만좌모의 36개월 월평균을 100으로 두고 환산한 값이에요. 장소마다 실제로 많이 치는 검색어(예: "츄라우미", "오키나와 츄라우미", "츄라우미 수족관")를 묶어서 셌어요.</li>
+      <li><b>3년 평균 검색지수</b>: 2023년 11월부터 2026년 10월까지 36개월의 평균이에요.</li>
+      <li><b>꾸준함</b>: 세 해(23.11~24.10, 24.11~25.10, 25.11~26.10) 중 가장 적게 찾은 해의 평균을 가장 많이 찾은 해의 평균으로 나눈 값이에요. 100%면 해마다 똑같이 찾은 곳이고, 새로 생기거나 한때만 유행한 곳은 낮아요.</li>
+      <li><b>스테디 점수</b>: 3년 평균 검색지수 × 꾸준함. 많이 찾으면서 해마다 고르게 찾을수록 높아요.</li>
+      <li><b>검색 적음</b>: 검색어 트렌드는 정확히 그 검색어를 친 수만 세고, 아주 적은 검색량은 0으로 나와요. 나시로비치, 해중도로, 츠보야처럼 블로그 글은 꾸준한데 검색지수가 낮은 곳이 여기에 들어가요. 이런 곳은 최근 30일 블로그 글 수를 함께 보세요.</li>
+      <li><b>최근 30일 블로그</b>: "오키나와 + 장소명"으로 블로그를 최신순으로 검색해, 장소명과 "오키나와" 또는 "나하"가 함께 들어간 글만 센 수예요. "약"이 붙은 값은 최신 글 1,000건이 30일 안에 다 들어와서 하루 평균으로 늘려 잡은 추정치예요.</li>
+      <li><b>수집 글 언급</b>: 오키나와 여행·지역별·분류별 검색어 24개로 모은 블로그·카페 글 중 그 장소를 언급한 글 수예요.</li>
+      <li>돈키호테, 모토무라, 이치란, 단보라멘, A&amp;W, 구루메 회전초밥처럼 다른 지역에도 지점이 있는 곳은 "오키나와"나 "국제거리"가 함께 들어간 검색어만 셌어요.</li>
+      <li>장소 목록은 수집 글에서 자주 나온 이름을 사람이 확인해 정리했어요. 지역 이름(차탄, 모토부 등), 교통, 다른 섬(미야코지마, 이시가키), 호텔은 넣지 않았어요.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+window.okr = { cat: '', tier: '', sort: 'steady', sel: null };
+window.okrEnc = (s) => String(s).replace(/%/g, '%25').replace(/&/g, '%26').replace(/=/g, '%3D');
+window.okrPct = (v) => v == null ? '–' : (v > 0 ? '+' : '') + d3.format(',')(v) + '%';
+window.okrNum = (v) => v == null ? '–' : d3.format(',')(v);
+window.okrCats = ['관광지', '해변·섬', '쇼핑·거리', '맛집', '카페'];
+window.okrTierCls = { '필수 스테디': 't1', '꾸준한 곳': 't2', '변동 큼': 't3', '검색 적음': 't4' };
+window.okrColor = (cat) => dash.colors[Math.max(0, okrCats.indexOf(cat)) % dash.colors.length];
+window.okrSeries = (() => {
+  let src = null, map = null;
+  return () => {
+    const t = dash.data('trend');
+    if (t.status !== 'ok') return null;
+    if (t.data !== src) {
+      src = t.data; map = new Map();
+      for (const r of t.data) { if (!map.has(r.name)) map.set(r.name, []); map.get(r.name).push(r); }
+    }
+    return map;
+  };
+})();
+window.okrTierMap = () => {
+  const t = dash.data('tiers');
+  return t.status === 'ok' && Array.isArray(t.data) ? new Map(t.data.map((r) => [r.name, r.tier])) : new Map();
+};
+window.okrPicks = () => {
+  const p = dash.data('picks');
+  return p.status === 'ok' && Array.isArray(p.data) ? new Map(p.data.map((r) => [r.name, r])) : new Map();
+};
+window.okrSilk = () => { const s = document.createElement('span'); s.className = 'okr-silk'; s.textContent = 'silk pick!'; return s; };
+window.okrMapUrl = (place, pick) => {
+  const q = (pick && pick.mapQuery) || (place && place.mapQuery);
+  return q ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q) : null;
+};
+window.okrMapLink = (url, text) => {
+  const a = document.createElement('a'); a.className = 'okr-map'; a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  a.textContent = text || '구글맵'; a.addEventListener('click', (e) => e.stopPropagation()); return a;
+};
+window.okrSelect = (name, scroll) => {
+  okr.sel = name;
+  ['dName', 'dPick', 'dLinks', 'dFacts', 'dTrend', 'dPosts', 'rows', 'scatter', 'rank1', 'rank2'].forEach((n) => dash.draw(n));
+  if (scroll) { const d = document.getElementById('detail'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+};
+window.okrSelected = () => {
+  const p = dash.data('places');
+  if (p.status !== 'ok' || !p.data.length) return null;
+  return p.data.find((r) => r.name === okr.sel) || [...p.data].sort((a, b) => b.steady - a.steady)[0];
+};
+window.okrSpark = (el, values, w, h, color) => {
+  const svg = d3.select(el).append('svg').attr('width', w).attr('height', h).attr('viewBox', `0 0 ${w} ${h}`).attr('role', 'img').attr('aria-label', '36개월 검색 추세');
+  if (!values || !values.length) return svg;
+  const x = d3.scaleLinear().domain([0, values.length - 1]).range([2, w - 3]);
+  const y = d3.scaleLinear().domain([0, d3.max(values) || 1]).range([h - 2, 2]);
+  svg.append('path').attr('d', d3.area().x((d, i) => x(i)).y0(h - 1).y1((d) => y(d))(values)).style('fill', color).style('opacity', 0.15);
+  svg.append('path').attr('d', d3.line().x((d, i) => x(i)).y((d) => y(d))(values)).style('fill', 'none').style('stroke', color).style('stroke-width', 1.5);
+  svg.append('circle').attr('cx', x(values.length - 1)).attr('cy', y(values[values.length - 1])).attr('r', 2.5).style('fill', color);
+  return svg;
+};
+window.okrSpan = (src, field, name, text, cls) => {
+  const s = document.createElement('span');
+  s.dataset.source = src; s.dataset.field = field; s.dataset.where = 'name=' + okrEnc(name);
+  s.textContent = text; if (cls) s.className = cls; return s;
+};
+</script>
+
+<script>
+dash.calc('tiers', {
+  inputs: ['places'],
+  title: '스테디 등급',
+  description: '스테디 점수와 꾸준함으로 나눈 등급: 필수 스테디(점수 30 이상·꾸준함 50% 이상), 꾸준한 곳(점수 5 이상·꾸준함 50% 이상), 변동 큼(3년 평균 5 이상·꾸준함 50% 미만), 나머지는 검색 적음',
+  fn: (places) => places.map((p) => ({
+    name: p.name,
+    tier: p.steady >= 30 && p.consistency >= 50 ? '필수 스테디'
+      : p.steady >= 5 && p.consistency >= 50 ? '꾸준한 곳'
+      : p.vol36 >= 5 && p.consistency < 50 ? '변동 큼'
+      : '검색 적음',
+  })),
+});
+dash.calc('tierCounts', {
+  inputs: ['tiers'],
+  title: '등급별 장소 수',
+  description: '스테디 등급마다 몇 곳인지',
+  fn: (tiers) => ['필수 스테디', '꾸준한 곳', '변동 큼', '검색 적음'].map((t) => ({ tier: t, count: tiers.filter((r) => r.tier === t).length })),
+});
+dash.calc('rising', {
+  inputs: ['places'],
+  title: '참고: 작년보다 많이 찾는 곳',
+  description: '오키나와 전체 대비 작년 같은 3개월보다 20% 이상 오르고 3년 평균 검색지수 3 이상인 곳, 성장률 순',
+  fn: (places) => places.filter((p) => p.relYoy != null && p.relYoy >= 20 && p.vol36 >= 3).sort((a, b) => b.relYoy - a.relYoy),
+});
+dash.calc('cooling', {
+  inputs: ['places'],
+  title: '참고: 작년보다 덜 찾는 곳',
+  description: '오키나와 전체 대비 작년 같은 3개월보다 30% 이상 줄고 3년 평균 검색지수 5 이상인 곳, 감소 폭 순',
+  fn: (places) => places.filter((p) => p.relYoy != null && p.relYoy <= -30 && p.vol36 >= 5).sort((a, b) => a.relYoy - b.relYoy),
+});
+</script>
+
+<script>
+dash.draw('topName', (el) => {
+  const p = dash.data('places');
+  if (p.status !== 'ok' || !p.data.length) { el.textContent = '—'; return; }
+  const top = [...p.data].sort((a, b) => b.steady - a.steady)[0];
+  el.replaceChildren(okrSpan('places', 'name', top.name, top.name));
+});
+const okrCount = (el, tier) => {
+  const c = dash.data('tierCounts');
+  if (c.status !== 'ok' || !Array.isArray(c.data)) { el.textContent = '—'; return; }
+  const r = c.data.find((d) => d.tier === tier);
+  const s = document.createElement('span');
+  s.dataset.source = 'tierCounts'; s.dataset.field = 'count'; s.dataset.where = 'tier=' + okrEnc(tier);
+  s.textContent = r ? okrNum(r.count) : '0';
+  el.replaceChildren(s);
+};
+dash.draw('cntT1', (el) => okrCount(el, '필수 스테디'));
+dash.draw('cntT2', (el) => okrCount(el, '꾸준한 곳'));
+dash.draw('nPosts', (el) => { const s = dash.data('stats'); el.textContent = s.status === 'ok' && s.data.length ? okrNum(s.data[0].collected) : '—'; });
+dash.draw('nPlaces', (el) => { const s = dash.data('stats'); el.textContent = s.status === 'ok' && s.data.length ? okrNum(s.data[0].places) : '—'; });
+
+const okrRank = (el, tier, limit) => {
+  const p = dash.data('places');
+  const tm = okrTierMap();
+  if (p.status !== 'ok' || !tm.size) { el.textContent = p.status === 'error' ? '불러오지 못했어요' : ''; return; }
+  const rows = p.data.filter((r) => tm.get(r.name) === tier).sort((a, b) => b.steady - a.steady).slice(0, limit);
+  el.replaceChildren();
+  if (!rows.length) { el.textContent = '해당하는 곳이 없어요'; return; }
+  const max = d3.max(rows, (r) => r.steady) || 1;
+  const ymax = d3.max(rows, (r) => Math.max(r.yr1, r.yr2, r.yr3)) || 1;
+  const sel = okrSelected();
+  const picks = okrPicks();
+  const hdr = document.createElement('div'); hdr.className = 'row hdr';
+  [['', 'no'], ['장소', ''], ['스테디 점수', 'barc'], ['', 'num'], ['연도별', 'yrsc'], ['꾸준함', 'num']].forEach(([t, c]) => {
+    const s = document.createElement('span'); s.textContent = t; if (c) s.className = c; hdr.append(s);
+  });
+  el.append(hdr);
+  rows.forEach((r, i) => {
+    const b = document.createElement('button'); b.type = 'button';
+    b.className = 'row' + (sel && sel.name === r.name ? ' on' : '');
+    b.addEventListener('click', () => okrSelect(r.name, true));
+    const no = document.createElement('span'); no.className = 'no'; no.textContent = i + 1;
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = r.name;
+    const sm = document.createElement('small');
+    if (picks.has(r.name)) sm.append(okrSilk(), ' ');
+    sm.append(`${r.cat} · ${r.region}`); nm.append(sm);
+    const bc = document.createElement('span'); bc.className = 'barc';
+    const bar = document.createElement('span'); bar.className = 'bar'; bar.style.display = 'block';
+    bar.style.width = (r.steady / max * 100) + '%'; bar.style.background = okrColor(r.cat); bc.append(bar);
+    const v = okrSpan('places', 'steady', r.name, okrNum(r.steady), 'num');
+    const yc = document.createElement('span'); yc.className = 'yrsc';
+    const yrs = document.createElement('span'); yrs.className = 'yrs';
+    yrs.setAttribute('aria-label', `연도별 검색지수 ${r.yr1}, ${r.yr2}, ${r.yr3}`);
+    [r.yr1, r.yr2, r.yr3].forEach((y, k) => {
+      const ii = document.createElement('i'); ii.style.height = Math.max(1, y / ymax * 22) + 'px';
+      ii.style.background = okrColor(r.cat); ii.style.opacity = String(0.35 + k * 0.3); yrs.append(ii);
+    });
+    yc.append(yrs);
+    const c = okrSpan('places', 'consistency', r.name, r.consistency + '%', 'num');
+    b.append(no, nm, bc, v, yc, c);
+    el.append(b);
+  });
+};
+dash.draw('rank1', (el) => okrRank(el, '필수 스테디', 30));
+dash.draw('rank2', (el) => okrRank(el, '꾸준한 곳', 30));
+
+dash.draw('legend', (el) => {
+  el.replaceChildren(...okrCats.map((c) => {
+    const s = document.createElement('span');
+    const i = document.createElement('i'); i.style.background = okrColor(c);
+    s.append(i, c); return s;
+  }));
+});
+
+dash.draw('scatter', (el) => {
+  const p = dash.data('places');
+  if (p.status !== 'ok') { el.textContent = p.status === 'error' ? '불러오지 못했어요' : '—'; return; }
+  el.replaceChildren();
+  const tm = okrTierMap();
+  const rows = p.data.filter((d) => d.vol36 >= 1);
+  const W = Math.max(300, el.clientWidth), H = W < 520 ? 340 : 420;
+  const m = { t: 16, r: 16, b: 40, l: 46 };
+  const x = d3.scaleLog().domain([1, d3.max(rows, (d) => d.vol36) * 1.2]).range([m.l, W - m.r]).clamp(true);
+  const y = d3.scaleLinear().domain([0, 100]).range([H - m.b, m.t]);
+  const r = d3.scaleSqrt().domain([0, d3.max(rows, (d) => d.blog30)]).range([3, W < 520 ? 13 : 20]);
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+    .attr('aria-label', '장소별 3년 평균 검색지수(가로, 로그)와 꾸준함(세로) 산점도');
+  const xt = [1, 2, 5, 10, 20, 50, 100, 200, 400].filter((v) => v <= x.domain()[1]);
+  svg.append('g').selectAll('line').data(xt).join('line').attr('x1', x).attr('x2', x).attr('y1', m.t).attr('y2', H - m.b).style('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('line').data([0, 25, 50, 75, 100]).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).style('stroke', 'var(--cds-chart-grid)');
+  // 필수 스테디 경계: 점수 30 = 검색지수 × 꾸준함, 꾸준함 50% 이상
+  const curve = d3.range(60, x.domain()[1], (x.domain()[1] - 60) / 60).concat([x.domain()[1]]).map((v) => [v, Math.min(100, 3000 / v)]);
+  svg.append('path').attr('d', d3.line().x((d) => x(d[0])).y((d) => y(d[1]))(curve)).style('fill', 'none').style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '4 3');
+  svg.append('line').attr('x1', x(60)).attr('x2', x(60)).attr('y1', y(50)).attr('y2', y(100)).style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '4 3');
+  svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(xt).tickFormat(d3.format('d')).tickSize(0).tickPadding(8)).call((g) => g.select('.domain').remove());
+  svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues([0, 25, 50, 75, 100]).tickFormat((v) => v + '%').tickSize(0).tickPadding(8)).call((g) => g.select('.domain').remove());
+  svg.append('text').attr('x', W - m.r).attr('y', H - 6).attr('text-anchor', 'end').text('3년 평균 검색지수 →');
+  svg.append('text').attr('x', m.l + 4).attr('y', m.t + 10).text('꾸준함 ↑');
+  const sel = okrSelected();
+  const tip = d3.select(el).append('div').attr('class', 'okr-tip').attr('hidden', true);
+  svg.append('g').selectAll('circle').data([...rows].sort((a, b) => b.blog30 - a.blog30)).join('circle')
+    .attr('cx', (d) => x(d.vol36)).attr('cy', (d) => y(d.consistency)).attr('r', (d) => r(d.blog30))
+    .style('fill', (d) => okrColor(d.cat)).style('fill-opacity', (d) => tm.get(d.name) === '필수 스테디' ? 0.75 : 0.4)
+    .style('stroke', (d) => sel && d.name === sel.name ? 'var(--color-fg)' : okrColor(d.cat)).style('stroke-width', (d) => sel && d.name === sel.name ? 2 : 1)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => okrSelect(d.name, true))
+    .on('pointerenter pointermove', (e, d) => {
+      const [px, py] = d3.pointer(e, el);
+      tip.attr('hidden', null).html('');
+      tip.append('b').text(d.name);
+      if (okrPicks().has(d.name)) tip.append('div').text('silk pick! ' + okrPicks().get(d.name).note);
+      tip.append('div').text(`${tm.get(d.name) || ''} · ${d.cat} · ${d.region}`);
+      tip.append('div').text(`스테디 점수 ${okrNum(d.steady)} · 3년 평균 ${okrNum(d.vol36)} · 꾸준함 ${d.consistency}%`);
+      tip.append('div').text(`최근 30일 블로그 ${d.blog30est ? '약 ' : ''}${okrNum(d.blog30)}건`);
+      tip.style('left', Math.min(px + 12, el.clientWidth - 230) + 'px').style('top', (py + 12) + 'px');
+    })
+    .on('pointerleave', () => tip.attr('hidden', true));
+  const lab = [...rows].sort((a, b) => b.steady - a.steady).slice(0, W < 520 ? 8 : 18);
+  if (sel && !lab.includes(sel) && rows.includes(sel)) lab.push(sel);
+  const placed = [];
+  for (const d of lab) {
+    const tx = x(d.vol36) + r(d.blog30) + 3, ty = y(d.consistency) + 4;
+    const t = svg.append('text').attr('class', 'lbl').attr('x', tx).attr('y', ty).text(d.name).style('pointer-events', 'none');
+    const w = t.node().getComputedTextLength();
+    let ax = tx, anchor = 'start';
+    if (tx + w > W - m.r) { ax = x(d.vol36) - r(d.blog30) - 3; anchor = 'end'; t.attr('x', ax).attr('text-anchor', 'end'); }
+    const box = anchor === 'start' ? [ax, ty - 11, ax + w, ty + 2] : [ax - w, ty - 11, ax, ty + 2];
+    if (placed.some((b) => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) { t.remove(); continue; }
+    placed.push(box);
+  }
+});
+</script>
+
+<script>
+dash.draw('dName', (el) => {
+  const s = okrSelected();
+  if (!s) { el.textContent = '—'; return; }
+  el.replaceChildren(s.name);
+  if (okrPicks().has(s.name)) el.append(okrSilk());
+});
+dash.draw('dPick', (el) => {
+  const s = okrSelected(); const pk = s ? okrPicks().get(s.name) : null;
+  if (!pk) { el.replaceChildren(); return; }
+  el.replaceChildren(okrSpan('picks', 'note', pk.name, pk.note));
+});
+dash.draw('dLinks', (el) => {
+  const s = okrSelected();
+  el.replaceChildren();
+  if (!s) return;
+  const url = okrMapUrl(s, okrPicks().get(s.name));
+  if (url) el.append(okrMapLink(url, '구글맵에서 보기'));
+  else { const n = document.createElement('span'); n.className = 'okr-note'; n.textContent = '지점이 여러 곳이라 구글맵 링크는 넣지 않았어요'; el.append(n); }
+});
+dash.draw('dFacts', (el) => {
+  const s = okrSelected();
+  if (!s) { el.textContent = '—'; return; }
+  const tm = okrTierMap();
+  el.replaceChildren();
+  const add = (label, src, field, text, cls, wrapCls) => {
+    const d = document.createElement('div'); if (wrapCls) d.className = wrapCls;
+    const l = document.createElement('span'); l.textContent = label;
+    const v = document.createElement('strong'); v.textContent = text;
+    if (field) { v.dataset.source = src; v.dataset.field = field; v.dataset.where = 'name=' + okrEnc(s.name); }
+    if (cls) v.className = cls;
+    d.append(l, v); el.append(d);
+  };
+  add('등급', 'tiers', 'tier', tm.get(s.name) || '–');
+  add('분류 · 지역', null, null, `${s.cat} · ${s.region}`);
+  add('스테디 점수', 'places', 'steady', okrNum(s.steady));
+  add('3년 평균 검색지수', 'places', 'vol36', okrNum(s.vol36));
+  add('꾸준함', 'places', 'consistency', s.consistency + '%');
+  add('연도별 검색지수', null, null, `${okrNum(s.yr1)} → ${okrNum(s.yr2)} → ${okrNum(s.yr3)}`);
+  add('최근 30일 블로그', 'places', 'blog30', (s.blog30est ? '약 ' : '') + okrNum(s.blog30));
+  add('참고: 작년 대비', 'places', 'relYoy', okrPct(s.relYoy), null, 'ref');
+});
+dash.draw('dTrend', (el) => {
+  const s = okrSelected(); const ser = okrSeries();
+  if (!s || !ser) { el.textContent = '—'; return; }
+  el.replaceChildren();
+  const rows = ser.get(s.name) || [];
+  const W = Math.max(260, el.clientWidth), H = 210, m = { t: 22, r: 12, b: 28, l: 40 };
+  const x = d3.scalePoint().domain(rows.map((d) => d.month)).range([m.l, W - m.r]);
+  const y = d3.scaleLinear().domain([0, (d3.max(rows, (d) => d.index) || 1) * 1.1]).nice(4).range([H - m.b, m.t]);
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${s.name} 월별 검색지수 36개월`);
+  const step = x.step();
+  const labels = ['23.11~24.10', '24.11~25.10', '25.11~26.10'];
+  if (rows.length === 36) [0, 1, 2].forEach((k) => {
+    const a = rows[k * 12].month, b = rows[k * 12 + 11].month;
+    if (k % 2 === 0) svg.append('rect').attr('x', x(a) - step / 2).attr('width', x(b) - x(a) + step).attr('y', m.t).attr('height', H - m.b - m.t).style('fill', 'var(--cds-chart-muted)').style('opacity', 0.18);
+    svg.append('text').attr('x', (x(a) + x(b)) / 2).attr('y', m.t - 8).attr('text-anchor', 'middle').text(labels[k]);
+  });
+  svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).style('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickSize(0).tickPadding(6)).call((g) => g.select('.domain').remove());
+  const xt = rows.filter((d, i) => i % 6 === 0 || i === rows.length - 1).map((d) => d.month);
+  svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(xt).tickFormat((v) => v.slice(2).replace('-', '.')).tickSize(0).tickPadding(8)).call((g) => g.select('.domain').remove());
+  const c = okrColor(s.cat);
+  svg.append('path').attr('d', d3.line().x((d) => x(d.month)).y((d) => y(d.index))(rows)).style('fill', 'none').style('stroke', c).style('stroke-width', 2);
+  const tip = d3.select(el).append('div').attr('class', 'okr-tip').attr('hidden', true);
+  svg.append('g').selectAll('circle').data(rows).join('circle').attr('cx', (d) => x(d.month)).attr('cy', (d) => y(d.index)).attr('r', (d, i) => i === rows.length - 1 ? 4 : 2.2).style('fill', c)
+    .on('pointerenter', (e, d) => {
+      const [px, py] = d3.pointer(e, el);
+      tip.attr('hidden', null).html(''); tip.append('b').text(d.month.replace('-', '년 ') + '월'); tip.append('div').text('검색지수 ' + okrNum(d.index));
+      tip.style('left', Math.min(px + 10, el.clientWidth - 140) + 'px').style('top', Math.max(0, py - 50) + 'px');
+    })
+    .on('pointerleave', () => tip.attr('hidden', true));
+});
+dash.draw('dPosts', (el) => {
+  const s = okrSelected(); const p = dash.data('posts');
+  if (!s || p.status !== 'ok') { el.replaceChildren(); return; }
+  const list = p.data.filter((d) => d.name === s.name);
+  el.replaceChildren();
+  if (!list.length) { const li = document.createElement('li'); li.textContent = '대표 글이 없어요'; el.append(li); return; }
+  for (const d of list) {
+    const li = document.createElement('li');
+    const head = document.createElement('div');
+    const pill = document.createElement('span'); pill.className = 'okr-pill'; pill.textContent = d.type;
+    const a = document.createElement('a'); a.textContent = d.title || '(제목 없음)';
+    if (/^https:\/\//.test(d.link || '')) { a.href = d.link; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+    head.append(pill, a);
+    const sum = document.createElement('p'); sum.textContent = d.summary;
+    const meta = document.createElement('p');
+    const dt = d.date && d.date.length === 8 ? `${d.date.slice(0, 4)}.${d.date.slice(4, 6)}.${d.date.slice(6)}` : '';
+    meta.textContent = [d.author, dt].filter(Boolean).join(' · ');
+    li.append(head, sum, meta); el.append(li);
+  }
+});
+</script>
+
+<script>
+dash.draw('catSel', (sel) => {
+  const p = dash.data('places');
+  const cats = p.status === 'ok' ? okrCats.filter((c) => p.data.some((r) => r.cat === c)) : [];
+  sel.replaceChildren(new Option('전체', ''), ...cats.map((c) => new Option(c, c)));
+  sel.value = okr.cat;
+  sel.onchange = () => { okr.cat = sel.value; dash.draw('rows'); };
+});
+for (const s of document.querySelectorAll('#okr-sort')) s.addEventListener('change', () => { okr.sort = s.value; dash.draw('rows'); });
+for (const s of document.querySelectorAll('#okr-tier')) s.addEventListener('change', () => { okr.tier = s.value; dash.draw('rows'); });
+dash.draw('rows', (tb) => {
+  const p = dash.data('places'); const ser = okrSeries(); const tm = okrTierMap(); const picks = okrPicks();
+  if (p.status !== 'ok') { tb.replaceChildren(); return; }
+  const k = okr.sort;
+  const rows = p.data.filter((r) => (!okr.cat || r.cat === okr.cat) && (!okr.tier || tm.get(r.name) === okr.tier))
+    .sort((a, b) => (b[k] ?? -Infinity) - (a[k] ?? -Infinity));
+  const sel = okrSelected();
+  tb.replaceChildren();
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+    tr.dataset.key = okrEnc(r.name);
+    if (sel && sel.name === r.name) tr.className = 'on';
+    tr.addEventListener('click', () => okrSelect(r.name, true));
+    const td = (text, cls) => { const c = document.createElement('td'); c.textContent = text; if (cls) c.className = cls; tr.append(c); return c; };
+    const nmc = td(r.name, 'nm');
+    if (picks.has(r.name)) nmc.append(okrSilk());
+    const tier = tm.get(r.name) || '';
+    const tc = td(''); const bd = document.createElement('span'); bd.className = 'okr-badge ' + (okrTierCls[tier] || ''); bd.textContent = tier; tc.append(bd);
+    td(r.cat); td(r.region);
+    td(okrNum(r.steady), 'n'); td(okrNum(r.vol36), 'n'); td(r.consistency + '%', 'n');
+    const sp = td('');
+    okrSpark(sp, ser && ser.get(r.name) ? ser.get(r.name).map((d) => d.index) : null, 100, 22, okrColor(r.cat));
+    td((r.blog30est ? '약 ' : '') + okrNum(r.blog30), 'n');
+    td(okrNum(r.mentions), 'n');
+    td(okrPct(r.relYoy), 'n ref');
+    const mc = td(''); const mu = okrMapUrl(r, picks.get(r.name)); if (mu) mc.append(okrMapLink(mu));
+    tb.append(tr);
+  }
+});
+
+dash.draw('pickCards', (el) => {
+  const pk = dash.data('picks'); const p = dash.data('places'); const tm = okrTierMap();
+  if (pk.status !== 'ok' || !Array.isArray(pk.data)) { el.textContent = pk.status === 'error' ? '불러오지 못했어요' : ''; return; }
+  const byName = p.status === 'ok' ? new Map(p.data.map((r) => [r.name, r])) : new Map();
+  el.replaceChildren();
+  for (const k of pk.data) {
+    const place = byName.get(k.name);
+    const c = document.createElement('div'); c.className = 'okr-pick';
+    const nm = document.createElement('button'); nm.type = 'button'; nm.className = 'nm'; nm.textContent = k.name;
+    nm.addEventListener('click', () => okrSelect(k.name, true));
+    const note = document.createElement('p'); note.className = 'note'; note.append(okrSpan('picks', 'note', k.name, k.note));
+    const meta = document.createElement('div'); meta.className = 'meta';
+    const tier = tm.get(k.name);
+    if (tier) { const bd = document.createElement('span'); bd.className = 'okr-badge ' + (okrTierCls[tier] || ''); bd.textContent = tier; meta.append(bd); }
+    if (place) { const sc = document.createElement('span'); sc.append('스테디 점수 ', okrSpan('places', 'steady', k.name, okrNum(place.steady))); meta.append(sc); }
+    const url = okrMapUrl(place, k); if (url) meta.append(okrMapLink(url));
+    c.append(nm, note, meta); el.append(c);
+  }
+});
+
+const okrChips = (el, id) => {
+  const r = dash.data(id);
+  if (r.status !== 'ok' || !Array.isArray(r.data)) { el.replaceChildren(); return; }
+  el.replaceChildren();
+  if (!r.data.length) { el.textContent = '해당하는 곳이 없어요'; return; }
+  for (const p of r.data.slice(0, 10)) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'okr-chip';
+    b.addEventListener('click', () => okrSelect(p.name, true));
+    b.append(p.name + ' ', okrSpan(id, 'relYoy', p.name, okrPct(p.relYoy), p.relYoy >= 0 ? 'okr-up' : 'okr-down'));
+    el.append(b);
+  }
+};
+dash.draw('chipsUp', (el) => okrChips(el, 'rising'));
+dash.draw('chipsDown', (el) => okrChips(el, 'cooling'));
+</script>
+<p class="okr-foot">데이터: 네이버 검색 API·검색어 트렌드(NAVER API HUB) · 마지막 갱신 2026년 11월 9일</p>
+</div>
+</body>
+</html>

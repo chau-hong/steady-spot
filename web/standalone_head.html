@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오키나와 스테디 명소</title>
+<meta name="description" content="네이버 검색 3년 추세와 블로그·카페 글로 본 오키나와의 꾸준한 명소 순위">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@400&display=swap">
+<style>
+/* 대시보드 환경이 주던 디자인 토큰을 이 페이지에서 직접 정의 */
+:root {
+  --color-fg: #1d2326; --color-fg-muted: #5f6b70; --color-bg: #fbfcfc; --color-panel: #f1f4f4; --color-border-line: #dfe5e6;
+  --color-ok: #1f7a4d; --color-warn: #a35f00; --color-bad: #b4372d;
+  --font-anthropic-sans: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  --font-anthropic-serif: "Noto Serif KR", "Apple SD Gothic Neo", Georgia, serif;
+  --cds-font-size-caption: 12px; --cds-font-size-body: 14px; --cds-font-size-heading: 18px; --cds-font-size-title: 28px; --cds-font-weight-medium: 500;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 12px; --cds-gap-lg: 20px; --cds-gap-xl: 36px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-radius: 8px;
+  --cds-chart-grid: #e6ebec; --cds-chart-axis: #c9d1d3; --cds-chart-reference: #7f8b90; --cds-chart-muted: #b9c3c6; --cds-text-secondary: #5f6b70;
+  --cds-surface-popover: #ffffff; --cds-border: #dfe5e6; --cds-shadow-popover: 0 6px 20px rgba(20, 30, 35, .12);
+  --c1: #1d7f8c; --c2: #e0784c; --c3: #6a5acd; --c4: #c2185b; --c5: #8a9a2b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-fg: #e8eced; --color-fg-muted: #9aa6aa; --color-bg: #14181a; --color-panel: #1c2224; --color-border-line: #2e3639;
+    --color-ok: #5cc690; --color-warn: #e6a54a; --color-bad: #f07a6e;
+    --cds-chart-grid: #262d30; --cds-chart-axis: #3a4346; --cds-chart-reference: #8a969a; --cds-chart-muted: #4a5558; --cds-text-secondary: #9aa6aa;
+    --cds-surface-popover: #222a2c; --cds-border: #333c3f; --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, .45);
+    --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --color-fg: #e8eced; --color-fg-muted: #9aa6aa; --color-bg: #14181a; --color-panel: #1c2224; --color-border-line: #2e3639;
+  --color-ok: #5cc690; --color-warn: #e6a54a; --color-bad: #f07a6e;
+  --cds-chart-grid: #262d30; --cds-chart-axis: #3a4346; --cds-chart-reference: #8a969a; --cds-chart-muted: #4a5558; --cds-text-secondary: #9aa6aa;
+  --cds-surface-popover: #222a2c; --cds-border: #333c3f; --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, .45);
+  --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454;
+  color-scheme: dark;
+}
+html, body { margin: 0; }
+body { background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); line-height: 1.45; }
+#dash-root { max-width: 1080px; margin: 0 auto; padding-block: 32px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.dash-select { font: inherit; color: var(--color-fg); background-color: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 6px; padding: 4px 8px; }
+.okr-foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: var(--cds-gap-xl); }
+@media (max-width: 560px) { :root { --cds-font-size-title: 23px; --cds-font-size-heading: 16px; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+/* 대시보드의 dash.* 기능 중 이 페이지가 쓰는 것만 흉내 내는 작은 연결 코드.
+   data/*.json 을 불러와 dash.data / dash.calc / dash.draw 로 넘겨준다. */
+window.dash = (() => {
+  const FILES = { places: 'data/places.json', trend: 'data/trend.json', posts: 'data/posts.json', stats: 'data/stats.json', picks: 'data/picks.json' };
+  const store = {}, calcs = {}, draws = {};
+  let ready = false;
+  for (const k in FILES) store[k] = { status: 'loading', data: [] };
+  const data = (id) => {
+    const c = calcs[id];
+    if (c) {
+      const ins = c.inputs.map(data);
+      if (ins.some((x) => x.status !== 'ok')) return { status: ins.some((x) => x.status === 'error') ? 'error' : 'loading', data: null };
+      if (!c.key || c.key.some((v, i) => v !== ins[i].data)) { c.key = ins.map((x) => x.data); c.val = c.fn(...ins.map((x) => x.data)); }
+      return { status: 'ok', data: c.val };
+    }
+    return store[id] || { status: 'missing', data: [] };
+  };
+  const run = (name) => {
+    document.querySelectorAll(`[data-draw="${name}"]`).forEach((el) => {
+      try { draws[name](el); } catch (e) { console.error('draw ' + name, e); }
+    });
+  };
+  const runAll = () => Object.keys(draws).forEach(run);
+  const api = {
+    colors: ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'],
+    data,
+    calc: (id, def) => { calcs[id] = { inputs: def.inputs, fn: def.fn }; },
+    draw: (name, fn) => { if (fn) { draws[name] = fn; if (ready) run(name); } else if (draws[name]) run(name); },
+    onData: () => {},
+    refresh: () => {},
+  };
+  const load = () => Promise.all(Object.entries(FILES).map(([k, url]) =>
+    fetch(url, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then((d) => { store[k] = { status: 'ok', data: d }; })
+      .catch(() => { store[k] = { status: 'error', data: [] }; })
+  )).then(() => { ready = true; runAll(); });
+  document.addEventListener('DOMContentLoaded', () => { runAll(); load(); });
+  let t = null, lastW = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { if (window.innerWidth !== lastW) { lastW = window.innerWidth; if (ready) runAll(); } }, 150);
+  });
+  return api;
+})();
+</script>
+</head>
+<body>
+<div id="dash-root">
