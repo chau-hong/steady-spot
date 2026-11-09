@@ -88,7 +88,12 @@ def build_city(C):
         page = page.replace(k, v); head = head.replace(k, v)
 
     (ROOT / "dist").mkdir(exist_ok=True)
-    artifact = page.replace('    <p class="okr-meta"><a class="okr-map" href="../">← 도시 목록</a></p>\n', "").replace("<!--OTHER_CITIES-->\n", "")
+    # Claude 대시보드용: 다른 도시로 가는 링크·그림 없이 제목만
+    artifact = (page.replace('        <p class="okr-back"><a href="../">← 도시 목록</a></p>\n', "")
+                .replace("{{BANNER_CLASS}}", "").replace("{{BANNER_IMG}}", "").replace("<!--OTHER_CITIES-->\n", ""))
+    img = city_image(C.SLUG)
+    page = (page.replace("{{BANNER_CLASS}}", " has-img" if img else "")
+                .replace("{{BANNER_IMG}}", f'<img src="../images/{img}" alt="">' if img else ""))
     (ROOT / "dist" / f"{C.SLUG}_artifact_index.html").write_text(artifact, encoding="utf-8")
     body = page.replace('<meta name="dash-one-writer">\n', "")
     foot = (f'<p class="okr-foot">데이터: 네이버 검색 API·검색어 트렌드(NAVER API HUB) · 마지막 갱신 {fill["{{COLLECTED_KO}}"]}</p>\n'

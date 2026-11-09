@@ -192,6 +192,15 @@ window.dash = (() => {
 .okr-picknote { margin: 0; padding: var(--cds-pad-sm) var(--cds-pad-md); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); line-height: 1.5; }
 .okr-picknote:empty { display: none; }
 .okr-dlinks { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; min-height: 1.2em; }
+.okr-banner { position: relative; display: flex; align-items: flex-end; min-height: 140px; border-radius: var(--cds-radius); overflow: hidden; background: var(--color-panel); border: 1px solid var(--color-border-line); }
+.okr-banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 38%; }
+.okr-banner.has-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 14, 30, .72), rgba(10, 14, 30, .08) 75%); }
+.okr-banner-in { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 2px; padding: var(--cds-pad-md) var(--cds-pad-lg); }
+.okr-back { margin: 0; font-size: var(--cds-font-size-caption); }
+.okr-back:empty { display: none; }
+.okr-back a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: currentColor; opacity: .9; }
+.okr-banner.has-img .okr-title, .okr-banner.has-img .okr-back { color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, .35); }
+@media (max-width: 560px) { .okr-banner { min-height: 112px; } }
 .okr-cities { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--cds-gap-md); }
 .okr-city { position: relative; display: block; border-radius: var(--cds-radius); overflow: hidden; border: 1px solid var(--color-border-line); color: #fff; text-decoration: none; aspect-ratio: 16 / 9; max-width: 100%; background: var(--color-panel); }
 .okr-city img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
@@ -206,8 +215,12 @@ window.dash = (() => {
 
 <div class="okr" lang="ko">
   <header class="okr-head" id="top">
-    <p class="okr-meta"><a class="okr-map" href="../">← 도시 목록</a></p>
-    <h1 class="okr-title">오키나와 스테디 명소</h1>
+    <div class="okr-banner has-img"><img src="../images/okinawa.svg" alt="">
+      <div class="okr-banner-in">
+        <p class="okr-back"><a href="../">← 도시 목록</a></p>
+        <h1 class="okr-title">오키나와 스테디 명소</h1>
+      </div>
+    </div>
     <p class="okr-lede">3년 동안 꾸준히 가장 많이 찾은 곳은 <b data-draw="topName">—</b>예요. 필수 스테디 <b data-draw="cntT1">—</b>곳, 꾸준한 곳 <b data-draw="cntT2">—</b>곳을 찾았어요.</p>
     <p class="okr-meta">블로그·카페 글 <span data-draw="nPosts" data-source="stats" data-field="collected" data-row="0">—</span>건에서 장소 <span data-draw="nPlaces" data-source="stats" data-field="places" data-row="0">—</span>곳을 뽑았어요 · 2026년 11월 9일 수집 · 네이버 검색 추세 2023년 11월 ~ 2026년 10월(36개월)</p>
   </header>
