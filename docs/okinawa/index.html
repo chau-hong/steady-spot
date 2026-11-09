@@ -192,6 +192,15 @@ window.dash = (() => {
 .okr-picknote { margin: 0; padding: var(--cds-pad-sm) var(--cds-pad-md); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); line-height: 1.5; }
 .okr-picknote:empty { display: none; }
 .okr-dlinks { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; min-height: 1.2em; }
+.okr-cities { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--cds-gap-md); }
+.okr-city { position: relative; display: block; border-radius: var(--cds-radius); overflow: hidden; border: 1px solid var(--color-border-line); color: #fff; text-decoration: none; aspect-ratio: 16 / 9; max-width: 100%; background: var(--color-panel); }
+.okr-city img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+.okr-city .cap { position: absolute; inset: auto 0 0 0; padding: var(--cds-pad-md); background: linear-gradient(to top, rgba(10, 14, 30, .78), rgba(10, 14, 30, 0)); display: flex; flex-direction: column; gap: 2px; }
+.okr-city .cap b { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); line-height: 1.1; }
+.okr-city .cap span { font-size: var(--cds-font-size-caption); opacity: .9; }
+.okr-city:hover img, .okr-city:focus-visible img { transform: scale(1.04); }
+.okr-city:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .okr-city img { transition: none; } }
 [data-dash-source-state=refreshing] { opacity: .5; }
 </style>
 
@@ -301,7 +310,13 @@ window.dash = (() => {
     <p class="okr-note">작년보다 덜 찾는 곳</p>
     <div class="okr-chips" data-draw="chipsDown" data-source="cooling"></div>
   </section>
-
+  <section class="okr-sec" id="other-cities">
+    <h2>다른 도시 둘러보기</h2>
+    <div class="okr-cities">
+    <a class="okr-city" href="../fukuoka/"><img src="../images/fukuoka.svg" alt="" loading="lazy"><span class="cap"><b>후쿠오카</b><span>라멘·쇼핑, 그리고 유후인 온천</span></span></a>
+    <a class="okr-city" href="../tokyo/"><img src="../images/tokyo.svg" alt="" loading="lazy"><span class="cap"><b>도쿄</b><span>전망대와 쇼핑, 근교까지</span></span></a>
+    </div>
+  </section>
 </div>
 
 <script>

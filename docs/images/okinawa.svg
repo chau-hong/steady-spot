@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="오키나와: 에메랄드빛 바다와 코우리대교">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3f4"/><stop offset="1" stop-color="#e6f7fb"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b8fb0"/><stop offset=".45" stop-color="#22b8b0"/><stop offset="1" stop-color="#7fe0cf"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#sky)"/>
+  <circle cx="520" cy="70" r="34" fill="#fff6c9"/>
+  <g fill="#ffffff" opacity=".9"><ellipse cx="140" cy="70" rx="56" ry="14"/><ellipse cx="180" cy="60" rx="38" ry="14"/><ellipse cx="380" cy="96" rx="44" ry="10"/></g>
+  <path d="M0 182 Q160 170 300 178 T640 176 V360 H0Z" fill="url(#sea)"/>
+  <path d="M430 178 q40 -26 90 -24 q50 2 70 22 z" fill="#2f7d5b"/>
+  <g stroke="#f4f4f0" stroke-width="5" fill="none"><path d="M120 196 L470 168"/></g>
+  <g stroke="#f4f4f0" stroke-width="3">
+    <line x1="150" y1="194" x2="150" y2="214"/><line x1="200" y1="190" x2="200" y2="212"/><line x1="250" y1="186" x2="250" y2="210"/>
+    <line x1="300" y1="182" x2="300" y2="206"/><line x1="350" y1="178" x2="350" y2="202"/><line x1="400" y1="174" x2="400" y2="198"/><line x1="450" y1="170" x2="450" y2="194"/>
+  </g>
+  <g fill="#ffffff" opacity=".55"><path d="M0 250 q80 -10 160 0 t160 0 t160 0 t160 0 v6 q-80 -10 -160 0 t-160 0 t-160 0 t-160 0z"/><path d="M0 292 q80 -10 160 0 t160 0 t160 0 t160 0 v5 q-80 -10 -160 0 t-160 0 t-160 0 t-160 0z"/></g>
+  <path d="M0 312 Q200 296 360 314 T640 306 V360 H0Z" fill="#f6e6c4"/>
+  <g transform="translate(70 230)">
+    <path d="M14 96 C10 60 12 30 22 0" stroke="#7a5a3a" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <g fill="#2f9a5f"><path d="M22 0 q-40 -6 -58 16 q30 -10 58 -16z"/><path d="M22 0 q38 -10 58 10 q-30 -8 -58 -10z"/><path d="M22 0 q-20 -30 -46 -30 q24 8 46 30z"/><path d="M22 0 q16 -32 46 -36 q-28 14 -46 36z"/></g>
+  </g>
+</svg>

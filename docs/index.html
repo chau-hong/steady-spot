@@ -15,9 +15,16 @@ main { max-width: 1000px; margin: 0 auto; padding-block: 48px 64px; padding-left
 h1 { font-family: "Noto Serif KR", Georgia, serif; font-weight: 400; font-size: 32px; margin: 0 0 8px; }
 .lede { color: var(--muted); margin: 0 0 32px; max-width: 60ch; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.city { display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: inherit; text-decoration: none; }
+.city { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: inherit; text-decoration: none; overflow: hidden; }
 .city:hover, .city:focus-visible { border-color: var(--accent); outline: none; }
-.city h2 { font-family: "Noto Serif KR", Georgia, serif; font-weight: 400; font-size: 24px; margin: 0; }
+.pic { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--line); }
+.pic img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+.city:hover .pic img, .city:focus-visible .pic img { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .pic img { transition: none; } }
+.cap { position: absolute; inset: auto 0 0 0; padding: 14px 16px; color: #fff; background: linear-gradient(to top, rgba(10, 14, 30, .78), rgba(10, 14, 30, 0)); display: flex; flex-direction: column; gap: 2px; }
+.cap b { font-family: "Noto Serif KR", Georgia, serif; font-weight: 400; font-size: 28px; line-height: 1.1; }
+.cap span { font-size: 13px; opacity: .92; }
+.body { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 18px; flex: 1; }
 .meta { color: var(--muted); font-size: 13px; margin: 0; }
 .silk { font-size: 11px; font-weight: 500; padding: 0 6px; border-radius: 999px; background: var(--fg); color: var(--bg); }
 ol { margin: 6px 0 4px; padding-left: 1.3em; }
@@ -31,22 +38,28 @@ footer { color: var(--muted); font-size: 12px; margin-top: 40px; }
   <p class="lede">여행지에서 꾸준히 많이 찾는 스테디 명소예요. 네이버 검색 3년 추세와 블로그·카페 글로 고르고, 매달 갱신해요.</p>
   <div class="grid">
     <a class="city" href="okinawa/">
-      <h2>오키나와</h2>
-      <p class="meta">장소 85곳 · <span class="silk">silk pick!</span> 7곳 · 2026년 11월 9일 갱신</p>
-      <ol><li>츄라우미 수족관</li><li>아메리칸빌리지</li><li>국제거리</li><li>세나가지마 우미카지테라스</li><li>만좌모</li></ol>
-      <span class="go">스테디 명소 보기 →</span>
+      <div class="pic"><img src="images/okinawa.svg" alt="" loading="lazy"><span class="cap"><b>오키나와</b><span>에메랄드빛 바다와 드라이브 여행</span></span></div>
+      <div class="body">
+        <p class="meta">장소 85곳 · <span class="silk">silk pick!</span> 7곳 · 2026년 11월 9일 갱신</p>
+        <ol><li>츄라우미 수족관</li><li>아메리칸빌리지</li><li>국제거리</li><li>세나가지마 우미카지테라스</li><li>만좌모</li></ol>
+        <span class="go">스테디 명소 보기 →</span>
+      </div>
     </a>
     <a class="city" href="fukuoka/">
-      <h2>후쿠오카</h2>
-      <p class="meta">장소 68곳 · 2026년 11월 10일 갱신</p>
-      <ol><li>유후인</li><li>캐널시티 하카타</li><li>다자이후 텐만구</li><li>돈키호테(후쿠오카)</li><li>오호리 공원</li></ol>
-      <span class="go">스테디 명소 보기 →</span>
+      <div class="pic"><img src="images/fukuoka.svg" alt="" loading="lazy"><span class="cap"><b>후쿠오카</b><span>라멘·쇼핑, 그리고 유후인 온천</span></span></div>
+      <div class="body">
+        <p class="meta">장소 68곳 · 2026년 11월 10일 갱신</p>
+        <ol><li>유후인</li><li>캐널시티 하카타</li><li>다자이후 텐만구</li><li>돈키호테(후쿠오카)</li><li>오호리 공원</li></ol>
+        <span class="go">스테디 명소 보기 →</span>
+      </div>
     </a>
     <a class="city" href="tokyo/">
-      <h2>도쿄</h2>
-      <p class="meta">장소 75곳 · 2026년 11월 10일 갱신</p>
-      <ol><li>도쿄 디즈니랜드</li><li>시부야 스카이</li><li>도쿄 디즈니씨</li><li>요코하마</li><li>아키하바라 전자상가</li></ol>
-      <span class="go">스테디 명소 보기 →</span>
+      <div class="pic"><img src="images/tokyo.svg" alt="" loading="lazy"><span class="cap"><b>도쿄</b><span>전망대와 쇼핑, 근교까지</span></span></div>
+      <div class="body">
+        <p class="meta">장소 75곳 · 2026년 11월 10일 갱신</p>
+        <ol><li>도쿄 디즈니랜드</li><li>시부야 스카이</li><li>도쿄 디즈니씨</li><li>요코하마</li><li>아키하바라 전자상가</li></ol>
+        <span class="go">스테디 명소 보기 →</span>
+      </div>
     </a>
   </div>
   <footer>데이터: 네이버 검색 API·검색어 트렌드(NAVER API HUB)</footer>

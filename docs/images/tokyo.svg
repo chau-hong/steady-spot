@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="도쿄: 밤하늘의 도쿄타워와 후지산">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141b3d"/><stop offset=".6" stop-color="#3a3f7c"/><stop offset="1" stop-color="#c46b8f"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#sky)"/>
+  <g fill="#ffffff"><circle cx="60" cy="40" r="1.5"/><circle cx="140" cy="80" r="1"/><circle cx="210" cy="30" r="1.5"/><circle cx="420" cy="50" r="1"/><circle cx="560" cy="34" r="1.5"/><circle cx="600" cy="90" r="1"/><circle cx="330" cy="24" r="1"/></g>
+  <circle cx="520" cy="80" r="20" fill="#f6efd2"/>
+  <path d="M60 250 L190 130 Q200 122 210 130 L340 250Z" fill="#6c6aa6"/>
+  <path d="M168 150 L190 130 Q200 122 210 130 L232 150 L218 146 L208 156 L196 144 L184 154Z" fill="#f2f2fb"/>
+  <g fill="#1d2147">
+    <rect x="0" y="232" width="60" height="128"/><rect x="66" y="210" width="40" height="150"/><rect x="112" y="240" width="56" height="120"/>
+    <rect x="300" y="200" width="44" height="160"/><rect x="350" y="226" width="52" height="134"/><rect x="470" y="190" width="38" height="170"/>
+    <rect x="514" y="230" width="60" height="130"/><rect x="580" y="214" width="60" height="146"/>
+  </g>
+  <g fill="#ffd27a" opacity=".85">
+    <rect x="76" y="222" width="5" height="5"/><rect x="90" y="240" width="5" height="5"/><rect x="310" y="214" width="5" height="5"/><rect x="326" y="240" width="5" height="5"/>
+    <rect x="480" y="204" width="5" height="5"/><rect x="494" y="236" width="5" height="5"/><rect x="590" y="232" width="5" height="5"/><rect x="606" y="256" width="5" height="5"/>
+  </g>
+  <g transform="translate(200 40)">
+    <path d="M30 0 L22 90 L4 300 H24 L36 160 L48 300 H68 L50 90 L42 0Z" fill="#e8452c"/>
+    <path d="M22 90 L50 90 M14 180 L58 180 M10 230 L62 230" stroke="#ffffff" stroke-width="6"/>
+    <rect x="14" y="82" width="44" height="14" fill="#f7f3ee"/><rect x="18" y="170" width="36" height="12" fill="#f7f3ee"/>
+    <path d="M24 300 Q36 250 48 300" fill="#141b3d"/>
+    <circle cx="36" cy="0" r="2.5" fill="#ffd27a"/>
+  </g>
+  <rect x="0" y="330" width="640" height="30" fill="#141b3d"/>
+</svg>

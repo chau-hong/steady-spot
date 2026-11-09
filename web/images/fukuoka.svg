@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="후쿠오카: 해 질 녘의 후쿠오카 타워와 모모치 해변">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b3f7a"/><stop offset=".5" stop-color="#e2777a"/><stop offset="1" stop-color="#ffc68a"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e98d6b"/><stop offset="1" stop-color="#5b4f86"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9fb4d8"/><stop offset=".5" stop-color="#e8eefc"/><stop offset="1" stop-color="#8aa0c8"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#sky)"/>
+  <circle cx="470" cy="208" r="40" fill="#ffd9a0" opacity=".95"/>
+  <g fill="#2c2b52" opacity=".85">
+    <rect x="40" y="170" width="40" height="70"/><rect x="88" y="150" width="30" height="90"/><rect x="124" y="182" width="46" height="58"/>
+    <rect x="380" y="186" width="34" height="54"/><rect x="520" y="176" width="40" height="64"/><rect x="566" y="190" width="54" height="50"/>
+  </g>
+  <g transform="translate(250 0)">
+    <path d="M18 240 L30 60 L48 60 L60 240 Z" fill="url(#glass)"/>
+    <g stroke="#6f7fa8" stroke-width="1" opacity=".7"><line x1="27" y1="100" x2="51" y2="100"/><line x1="25" y1="140" x2="53" y2="140"/><line x1="22" y1="180" x2="56" y2="180"/><line x1="20" y1="215" x2="58" y2="215"/></g>
+    <rect x="34" y="18" width="10" height="44" fill="#d9deec"/><line x1="39" y1="0" x2="39" y2="18" stroke="#d9deec" stroke-width="3"/>
+    <circle cx="39" cy="4" r="3" fill="#ff6b6b"/>
+  </g>
+  <rect x="0" y="236" width="640" height="8" fill="#2c2b52" opacity=".85"/>
+  <path d="M0 244 H640 V300 H0Z" fill="url(#sea)"/>
+  <path d="M440 244 h60 l-8 56 h-44z" fill="#ffd9a0" opacity=".35"/>
+  <path d="M0 296 Q180 286 340 298 T640 292 V360 H0Z" fill="#f0c99a"/>
+  <g fill="#8a5a3c"><rect x="96" y="300" width="4" height="34"/><path d="M98 300 l-26 -8 26 -2 26 2z"/></g>
+</svg>

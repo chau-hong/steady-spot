@@ -7,7 +7,7 @@
 사용법: python3 build.py            # 데이터가 준비된 모든 도시 + 도시 목록
         python3 build.py --city okinawa
 """
-import json, sys, datetime as dt, html
+import json, sys, shutil, datetime as dt, html
 from naver import clean, ROOT
 from cities import CITIES, load
 
@@ -88,14 +88,47 @@ def build_city(C):
         page = page.replace(k, v); head = head.replace(k, v)
 
     (ROOT / "dist").mkdir(exist_ok=True)
-    artifact = page.replace('    <p class="okr-meta"><a class="okr-map" href="../">← 도시 목록</a></p>\n', "")
+    artifact = page.replace('    <p class="okr-meta"><a class="okr-map" href="../">← 도시 목록</a></p>\n', "").replace("<!--OTHER_CITIES-->\n", "")
     (ROOT / "dist" / f"{C.SLUG}_artifact_index.html").write_text(artifact, encoding="utf-8")
     body = page.replace('<meta name="dash-one-writer">\n', "")
     foot = (f'<p class="okr-foot">데이터: 네이버 검색 API·검색어 트렌드(NAVER API HUB) · 마지막 갱신 {fill["{{COLLECTED_KO}}"]}</p>\n'
             "</div>\n</body>\n</html>\n")
     (ROOT / "docs" / C.SLUG / "index.html").write_text(head + body + foot, encoding="utf-8")
-    return {"slug": C.SLUG, "name": C.NAME, "updated": ko_date(D["generated"]),
+    return {"slug": C.SLUG, "name": C.NAME, "updated": ko_date(D["generated"]), "tagline": getattr(C, "TAGLINE", ""),
             "top": [p["name"] for p in sorted(places, key=lambda p: -p["steady"])[:5]], "count": len(places), "picks": len(picks)}
+
+
+def city_image(slug):
+    """web/images/<slug>.(jpg|jpeg|png|webp|svg) 중 있는 것을 docs/images/ 로 복사하고 파일 이름을 돌려준다.
+    직접 찍은 사진(jpg 등)을 넣으면 그림(svg)보다 먼저 쓴다."""
+    out = ROOT / "docs/images"; out.mkdir(parents=True, exist_ok=True)
+    for ext in ("jpg", "jpeg", "png", "webp", "svg"):
+        src = ROOT / "web/images" / f"{slug}.{ext}"
+        if src.exists():
+            shutil.copyfile(src, out / src.name)
+            return src.name
+    return None
+
+
+def city_card(c, prefix):
+    img = c.get("image")
+    pic = f'<img src="{prefix}images/{img}" alt="" loading="lazy">' if img else ""
+    sub = html.escape(c.get("tagline") or "") or f'장소 {c["count"]}곳'
+    return (f'    <a class="okr-city" href="{prefix}{c["slug"]}/">{pic}'
+            f'<span class="cap"><b>{html.escape(c["name"])}</b><span>{sub}</span></span></a>')
+
+
+def add_other_cities(cards):
+    """도시 페이지 맨 아래에 다른 도시 카드를 넣는다. 다음 도시부터 순서대로 돌아서 마지막 도시는 첫 도시로 이어진다."""
+    if len(cards) < 2:
+        return
+    for i, c in enumerate(cards):
+        others = [cards[(i + k) % len(cards)] for k in range(1, len(cards))]
+        block = ('  <section class="okr-sec" id="other-cities">\n    <h2>다른 도시 둘러보기</h2>\n    <div class="okr-cities">\n'
+                 + "\n".join(city_card(o, "../") for o in others) + "\n    </div>\n  </section>\n")
+        f = ROOT / "docs" / c["slug"] / "index.html"
+        if f.exists():
+            f.write_text(f.read_text(encoding="utf-8").replace("<!--OTHER_CITIES-->\n", block), encoding="utf-8")
 
 
 def build_hub(cards):
@@ -104,11 +137,14 @@ def build_hub(cards):
     for c in cards:
         top = "".join(f"<li>{html.escape(n)}</li>" for n in c["top"])
         pick = f' · <span class="silk">silk pick!</span> {c["picks"]}곳' if c["picks"] else ""
+        img = f'<img src="images/{c["image"]}" alt="" loading="lazy">' if c.get("image") else ""
         items.append(f'''    <a class="city" href="{c["slug"]}/">
-      <h2>{html.escape(c["name"])}</h2>
-      <p class="meta">장소 {c["count"]}곳{pick} · {c["updated"]} 갱신</p>
-      <ol>{top}</ol>
-      <span class="go">스테디 명소 보기 →</span>
+      <div class="pic">{img}<span class="cap"><b>{html.escape(c["name"])}</b><span>{html.escape(c.get("tagline") or "")}</span></span></div>
+      <div class="body">
+        <p class="meta">장소 {c["count"]}곳{pick} · {c["updated"]} 갱신</p>
+        <ol>{top}</ol>
+        <span class="go">스테디 명소 보기 →</span>
+      </div>
     </a>''')
     page = f'''<!doctype html>
 <html lang="ko">
@@ -127,9 +163,16 @@ main {{ max-width: 1000px; margin: 0 auto; padding-block: 48px 64px; padding-lef
 h1 {{ font-family: "Noto Serif KR", Georgia, serif; font-weight: 400; font-size: 32px; margin: 0 0 8px; }}
 .lede {{ color: var(--muted); margin: 0 0 32px; max-width: 60ch; }}
 .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }}
-.city {{ display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: inherit; text-decoration: none; }}
+.city {{ display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: inherit; text-decoration: none; overflow: hidden; }}
 .city:hover, .city:focus-visible {{ border-color: var(--accent); outline: none; }}
-.city h2 {{ font-family: "Noto Serif KR", Georgia, serif; font-weight: 400; font-size: 24px; margin: 0; }}
+.pic {{ position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--line); }}
+.pic img {{ width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }}
+.city:hover .pic img, .city:focus-visible .pic img {{ transform: scale(1.04); }}
+@media (prefers-reduced-motion: reduce) {{ .pic img {{ transition: none; }} }}
+.cap {{ position: absolute; inset: auto 0 0 0; padding: 14px 16px; color: #fff; background: linear-gradient(to top, rgba(10, 14, 30, .78), rgba(10, 14, 30, 0)); display: flex; flex-direction: column; gap: 2px; }}
+.cap b {{ font-family: "Noto Serif KR", Georgia, serif; font-weight: 400; font-size: 28px; line-height: 1.1; }}
+.cap span {{ font-size: 13px; opacity: .92; }}
+.body {{ display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 18px; flex: 1; }}
 .meta {{ color: var(--muted); font-size: 13px; margin: 0; }}
 .silk {{ font-size: 11px; font-weight: 500; padding: 0 6px; border-radius: 999px; background: var(--fg); color: var(--bg); }}
 ol {{ margin: 6px 0 4px; padding-left: 1.3em; }}
@@ -169,4 +212,8 @@ if __name__ == "__main__":
             pk = json.loads((ROOT / "docs" / slug / "data/picks.json").read_text(encoding="utf-8"))
             cards.append({"slug": slug, "name": C.NAME, "updated": ko_date(st["collectedOn"]), "count": len(pl), "picks": len(pk),
                           "top": [p["name"] for p in sorted(pl, key=lambda p: -p["steady"])[:5]]})
+    for c in cards:
+        c["image"] = city_image(c["slug"])
+        c.setdefault("tagline", getattr(load(c["slug"]), "TAGLINE", ""))
+    add_other_cities(cards)
     build_hub(cards)

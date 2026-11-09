@@ -22,6 +22,7 @@
 | `web/page.template.html` | 도시 페이지 템플릿. 화면을 고칠 때는 여기를 수정해요 |
 | `web/standalone_head.html` | GitHub Pages용 색·글꼴과 데이터 연결 코드 |
 | `web/picks/<도시>.json` | **silk pick!** 목록. 직접 고쳐도 돼요 |
+| `web/images/` | 도시 카드 이미지 |
 | `pipeline/update.py` | 전체 갱신을 한 번에 실행 |
 | `reports/<도시>_new_candidates.md` | 장소 목록에 없는 새 장소 후보 (배치가 매번 갱신) |
 
@@ -58,6 +59,7 @@ python3 pipeline/update.py --build-only       # API 호출 없이 페이지만 �
 
 - **silk pick! 추가·수정**: `web/picks/<도시>.json`에 `{"name": "장소 이름", "note": "메모"}`를 추가해요. 이름은 도시 설정의 대표 이름과 같아야 해요. 지점이 여러 곳인 곳은 `"mapQuery": "구글맵 검색어"`로 특정 지점을 지정할 수 있어요.
 - **장소 추가**: `reports/<도시>_new_candidates.md`를 보고 `pipeline/cities/<도시>.py`의 `PLACES`에 `(이름, 분류, 지역, [별칭])`을, `MAPQ`에 구글맵 검색어(일본어 명칭 권장)를 추가해요. 검색어 트렌드용 검색어가 따로 필요하면 같은 파일의 `EXTRA`에 넣어요.
+- **도시 카드 이미지 바꾸기**: `web/images/<도시>.jpg`(또는 png, webp)로 직접 찍은 사진을 넣으면 그림(`<도시>.svg`) 대신 그 사진을 써요. 가로세로 16:9 비율이 가장 잘 맞아요. 카드의 한 줄 소개는 도시 설정의 `TAGLINE`이에요.
 - **도시 추가**: `pipeline/cities/`에 설정 파일을 하나 만들고 `pipeline/cities/__init__.py`의 `CITIES`에 추가해요. 처음에는 `PLACES = []`로 두고 배치를 돌리면 후보 리포트가 나와요.
 - **장소가 아닌 후보 숨기기**: `pipeline/ignore_candidates.txt`에 한 줄씩 추가해요.
 
