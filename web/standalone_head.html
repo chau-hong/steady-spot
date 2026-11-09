@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>오키나와 스테디 명소</title>
-<meta name="description" content="네이버 검색 3년 추세와 블로그·카페 글로 본 오키나와의 꾸준한 명소 순위">
+<title>{{CITY}} 스테디 명소</title>
+<meta name="description" content="네이버 검색 3년 추세와 블로그·카페 글로 본 {{CITY}}의 꾸준한 명소 순위">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&family=Noto+Serif+KR:wght@400&display=swap">
 <style>
@@ -19,7 +19,7 @@
   --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-radius: 8px;
   --cds-chart-grid: #e6ebec; --cds-chart-axis: #c9d1d3; --cds-chart-reference: #7f8b90; --cds-chart-muted: #b9c3c6; --cds-text-secondary: #5f6b70;
   --cds-surface-popover: #ffffff; --cds-border: #dfe5e6; --cds-shadow-popover: 0 6px 20px rgba(20, 30, 35, .12);
-  --c1: #1d7f8c; --c2: #e0784c; --c3: #6a5acd; --c4: #c2185b; --c5: #8a9a2b;
+  --c1: #1d7f8c; --c2: #e0784c; --c3: #6a5acd; --c4: #c2185b; --c5: #8a9a2b; --c6: #b07d10;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -27,7 +27,7 @@
     --color-ok: #5cc690; --color-warn: #e6a54a; --color-bad: #f07a6e;
     --cds-chart-grid: #262d30; --cds-chart-axis: #3a4346; --cds-chart-reference: #8a969a; --cds-chart-muted: #4a5558; --cds-text-secondary: #9aa6aa;
     --cds-surface-popover: #222a2c; --cds-border: #333c3f; --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, .45);
-    --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454;
+    --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454; --c6: #e0b450;
     color-scheme: dark;
   }
 }
@@ -36,7 +36,7 @@
   --color-ok: #5cc690; --color-warn: #e6a54a; --color-bad: #f07a6e;
   --cds-chart-grid: #262d30; --cds-chart-axis: #3a4346; --cds-chart-reference: #8a969a; --cds-chart-muted: #4a5558; --cds-text-secondary: #9aa6aa;
   --cds-surface-popover: #222a2c; --cds-border: #333c3f; --cds-shadow-popover: 0 6px 20px rgba(0, 0, 0, .45);
-  --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454;
+  --c1: #4fb7c4; --c2: #f0956c; --c3: #9d8ff0; --c4: #ec6a9c; --c5: #b6c454; --c6: #e0b450;
   color-scheme: dark;
 }
 html, body { margin: 0; }
@@ -72,7 +72,7 @@ window.dash = (() => {
   };
   const runAll = () => Object.keys(draws).forEach(run);
   const api = {
-    colors: ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'],
+    colors: ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)'],
     data,
     calc: (id, def) => { calcs[id] = { inputs: def.inputs, fn: def.fn }; },
     draw: (name, fn) => { if (fn) { draws[name] = fn; if (ready) run(name); } else if (draws[name]) run(name); },

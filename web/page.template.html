@@ -100,7 +100,8 @@
 
 <div class="okr" lang="ko">
   <header class="okr-head" id="top">
-    <h1 class="okr-title">오키나와 스테디 명소</h1>
+    <p class="okr-meta"><a class="okr-map" href="../">← 도시 목록</a></p>
+    <h1 class="okr-title">{{CITY}} 스테디 명소</h1>
     <p class="okr-lede">3년 동안 꾸준히 가장 많이 찾은 곳은 <b data-draw="topName">—</b>예요. 필수 스테디 <b data-draw="cntT1">—</b>곳, 꾸준한 곳 <b data-draw="cntT2">—</b>곳을 찾았어요.</p>
     <p class="okr-meta">블로그·카페 글 <span data-draw="nPosts" data-source="stats" data-field="collected" data-row="0">—</span>건에서 장소 <span data-draw="nPlaces" data-source="stats" data-field="places" data-row="0">—</span>곳을 뽑았어요 · {{COLLECTED_KO}} 수집 · 네이버 검색 추세 {{FROM_KO}} ~ {{TO_KO}}(36개월)</p>
   </header>
@@ -146,6 +147,7 @@
           <ul class="okr-posts" data-draw="dPosts" data-source="posts"></ul>
         </div>
       </div>
+    </div>
   </section>
 
   <section class="okr-sec" id="all">
@@ -196,19 +198,21 @@
 
   <section class="okr-sec okr-ref" id="recent">
     <h2>참고: 최근 변화</h2>
-    <p class="okr-sub">{{RECENT3_KO}} 검색량을 작년 같은 달과 비교하고 오키나와 전체 증감만큼 보정한 값이에요. 한두 시즌의 변화라서 참고만 하세요.</p>
+    <p class="okr-sub">{{RECENT3_KO}} 검색량을 작년 같은 달과 비교하고 {{CITY}} 전체 증감만큼 보정한 값이에요. 한두 시즌의 변화라서 참고만 하세요.</p>
     <p class="okr-note">작년보다 많이 찾는 곳</p>
     <div class="okr-chips" data-draw="chipsUp" data-source="rising"></div>
     <p class="okr-note">작년보다 덜 찾는 곳</p>
     <div class="okr-chips" data-draw="chipsDown" data-source="cooling"></div>
   </section>
-  
+
+</div>
+
 <script>
 window.okr = { cat: '', tier: '', sort: 'steady', sel: null };
 window.okrEnc = (s) => String(s).replace(/%/g, '%25').replace(/&/g, '%26').replace(/=/g, '%3D');
 window.okrPct = (v) => v == null ? '–' : (v > 0 ? '+' : '') + d3.format(',')(v) + '%';
 window.okrNum = (v) => v == null ? '–' : d3.format(',')(v);
-window.okrCats = ['관광지', '해변·섬', '쇼핑·거리', '맛집', '카페'];
+window.okrCats = ['관광지', '해변·섬', '쇼핑·거리', '맛집', '카페', '근교'];
 window.okrTierCls = { '필수 스테디': 't1', '꾸준한 곳': 't2', '변동 큼': 't3', '검색 적음': 't4' };
 window.okrColor = (cat) => dash.colors[Math.max(0, okrCats.indexOf(cat)) % dash.colors.length];
 window.okrSeries = (() => {
@@ -289,13 +293,13 @@ dash.calc('tierCounts', {
 dash.calc('rising', {
   inputs: ['places'],
   title: '참고: 작년보다 많이 찾는 곳',
-  description: '오키나와 전체 대비 작년 같은 3개월보다 20% 이상 오르고 3년 평균 검색지수 3 이상인 곳, 성장률 순',
+  description: '{{CITY}} 전체 대비 작년 같은 3개월보다 20% 이상 오르고 3년 평균 검색지수 3 이상인 곳, 성장률 순',
   fn: (places) => places.filter((p) => p.relYoy != null && p.relYoy >= 20 && p.vol36 >= 3).sort((a, b) => b.relYoy - a.relYoy),
 });
 dash.calc('cooling', {
   inputs: ['places'],
   title: '참고: 작년보다 덜 찾는 곳',
-  description: '오키나와 전체 대비 작년 같은 3개월보다 30% 이상 줄고 3년 평균 검색지수 5 이상인 곳, 감소 폭 순',
+  description: '{{CITY}} 전체 대비 작년 같은 3개월보다 30% 이상 줄고 3년 평균 검색지수 5 이상인 곳, 감소 폭 순',
   fn: (places) => places.filter((p) => p.relYoy != null && p.relYoy <= -30 && p.vol36 >= 5).sort((a, b) => a.relYoy - b.relYoy),
 });
 </script>
@@ -367,7 +371,9 @@ dash.draw('rank1', (el) => okrRank(el, '필수 스테디', 30));
 dash.draw('rank2', (el) => okrRank(el, '꾸준한 곳', 30));
 
 dash.draw('legend', (el) => {
-  el.replaceChildren(...okrCats.map((c) => {
+  const p = dash.data('places');
+  const cats = p.status === 'ok' ? okrCats.filter((c) => p.data.some((r) => r.cat === c)) : okrCats;
+  el.replaceChildren(...cats.map((c) => {
     const s = document.createElement('span');
     const i = document.createElement('i'); i.style.background = okrColor(c);
     s.append(i, c); return s;

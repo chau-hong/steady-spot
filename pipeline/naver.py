@@ -27,17 +27,41 @@ def search(kind, query, display=100, start=1, sort="date"):
     url = f"https://naverapihub.apigw.ntruss.com/search/v1/{kind}?" + urllib.parse.urlencode(
         {"query": query, "display": display, "start": start, "sort": sort})
     req = urllib.request.Request(url, headers={"X-NCP-APIGW-API-KEY-ID": CID, "X-NCP-APIGW-API-KEY": SEC})
-    for attempt in range(4):
+    last = None
+    for attempt in range(6):
         try:
-            with urllib.request.urlopen(req, timeout=15) as r:
+            with urllib.request.urlopen(req, timeout=20) as r:
                 time.sleep(0.12)
-                return json.load(r)
+                data = json.load(r)
+            if "items" in data:
+                return data
+            if "total" in data:  # 결과가 0건이면 네이버가 items 칸을 빼고 보냄 → 빈 결과
+                data["items"] = []
+                return data
+            last = data  # 성공 코드인데 결과 대신 오류 내용이 온 경우 → 잠시 뒤 다시
         except urllib.error.HTTPError as e:
-            if e.code == 429:
-                time.sleep(1.5 * (attempt + 1)); continue
-            raise
-    raise RuntimeError("rate limited")
+            if e.code not in (429, 500, 502, 503, 504):
+                raise
+            last = e.code
+        except (urllib.error.URLError, TimeoutError) as e:
+            last = e
+        time.sleep(2 * (attempt + 1))
+    print(f"  ! 검색 실패({query}, {kind}, start={start}): {last} → 빈 결과로 처리", flush=True)
+    return {"total": 0, "items": []}
 
 TAG = re.compile(r"<[^>]+>")
 def clean(s):
     return html.unescape(TAG.sub("", s or "")).strip()
+
+
+def city_dir(C):
+    """도시별 수집 캐시 폴더 data/<slug>/ (깃에 올리지 않음)."""
+    d = ROOT / "data" / C.SLUG
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def has_context(text, C):
+    """글에 이 도시를 가리키는 말(CONTEXT)이 들어 있는지."""
+    return any(c in text for c in C.CONTEXT)
+
